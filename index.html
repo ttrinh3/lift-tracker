@@ -13,8 +13,13 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
     body { background: var(--bg); color: var(--text); padding-bottom: 90px; min-height: 100vh; }
-    header { background: var(--card); padding: 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
-    .header-meta { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--sub); margin-top: 6px; }
+    header { background: var(--card); padding: 14px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+    .header-top { display: flex; justify-content: space-between; align-items: center; }
+    .header-top h2 { font-size: 1.15rem; }
+    .settings-btn { background: #334155; border: none; color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .header-meta { display: flex; gap: 8px; font-size: 0.82rem; margin-top: 8px; flex-wrap: wrap; }
+    .meta-chip { background: #131d31; border: 1px solid var(--border); padding: 5px 12px; border-radius: 14px; color: #38bdf8; cursor: pointer; }
+    .meta-chip span { color: #fff; font-weight: bold; }
     .nav-weeks { display: flex; overflow-x: auto; gap: 8px; padding: 12px 16px; background: #131d31; border-bottom: 1px solid var(--border); }
     .week-btn { background: var(--card); border: 1px solid var(--border); color: var(--sub); padding: 8px 14px; border-radius: 20px; font-size: 0.85rem; white-space: nowrap; cursor: pointer; outline: none; }
     .week-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: bold; }
@@ -36,19 +41,26 @@
     footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 12px 16px; display: flex; gap: 10px; z-index: 10; }
     .btn { flex: 1; padding: 14px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.95rem; cursor: pointer; }
     .btn-primary { background: var(--accent); color: #fff; }
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
     .modal.open { display: flex; }
     .modal-box { background: var(--card); padding: 20px; border-radius: 12px; width: 100%; max-width: 360px; border: 1px solid var(--border); }
-    .modal-box input { width: 100%; padding: 10px; margin: 10px 0 16px; background: var(--bg); border: 1px solid var(--border); color: #fff; border-radius: 6px; font-size: 1rem; }
+    .modal-box h3 { font-size: 1.1rem; margin-bottom: 6px; }
+    .modal-box label { display: block; margin-top: 12px; font-size: 0.82rem; color: var(--sub); }
+    .modal-box input { width: 100%; padding: 12px; margin-top: 6px; background: var(--bg); border: 1px solid var(--border); color: #fff; border-radius: 6px; font-size: 1rem; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
   </style>
 </head>
 <body>
 
 <header>
-  <h2>Bench Program — Main Lifts</h2>
+  <div class="header-top">
+    <h2>Bench Specialization</h2>
+    <button class="settings-btn" onclick="openConfigModal()">⚙️ Settings</button>
+  </div>
   <div class="header-meta">
-    <span id="label-1rm">1RM: 315 lbs</span>
-    <span id="label-cycle">Cycle Start: 2026-09-14</span>
+    <div class="meta-chip" onclick="openConfigModal()">1RM: <span id="label-1rm">315 lbs</span> ✏️</div>
+    <div class="meta-chip" onclick="openConfigModal()">Start: <span id="label-cycle">2026-09-14</span> ✏️</div>
+    <div class="meta-chip" onclick="openConfigModal()">Cycle: <span id="label-cycle-num">#1</span></div>
   </div>
 </header>
 
@@ -59,14 +71,36 @@
   <button class="btn btn-primary" onclick="openResetModal()">Next Cycle Reset</button>
 </footer>
 
+<!-- Edit Config Modal -->
+<div class="modal" id="configModal">
+  <div class="modal-box">
+    <h3>Configure Current Cycle</h3>
+    <label>Cycle Number:</label>
+    <input type="number" id="configCycleNum" min="1" step="1">
+    <label>Cycle 1RM (lbs):</label>
+    <input type="number" id="config1rm" step="5">
+    <label>Cycle Start Date (Monday):</label>
+    <input type="date" id="configStartDate">
+    <div class="modal-actions">
+      <button class="btn" style="background:#475569; color:#fff;" onclick="closeModal('configModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveConfigModal()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Next Cycle Reset Modal -->
 <div class="modal" id="resetModal">
   <div class="modal-box">
     <h3>Start Next Cycle</h3>
-    <p style="font-size:0.85rem; color:var(--sub); margin-top:6px;">Advances start date by 8 weeks and unchecks all completed main lifts.</p>
-    <label style="display:block; margin-top:14px; font-size:0.85rem;">New Tested 1RM (lbs):</label>
-    <input type="number" id="new1rmInput" value="325" step="5">
-    <div style="display:flex; gap:10px;">
-      <button class="btn" style="background:#475569; color:#fff;" onclick="closeResetModal()">Cancel</button>
+    <p style="font-size:0.82rem; color:var(--sub); margin-top:4px;">Recalculates weights, advances the schedule, and resets checkboxes.</p>
+    <label>New Cycle #:</label>
+    <input type="number" id="resetCycleNum" min="1" step="1">
+    <label>New Tested 1RM (lbs):</label>
+    <input type="number" id="new1rmInput" step="5">
+    <label>New Cycle Start Date (Monday):</label>
+    <input type="date" id="newStartDateInput">
+    <div class="modal-actions">
+      <button class="btn" style="background:#475569; color:#fff;" onclick="closeModal('resetModal')">Cancel</button>
       <button class="btn btn-primary" onclick="executeNextCycle()">Confirm Reset</button>
     </div>
   </div>
@@ -102,6 +136,7 @@ try {
 let state = {
   oneRm: parseFloat(safeGetStorage('bench_main_1rm', 315)) || 315,
   startDate: safeGetStorage('bench_main_start_date', '2026-09-14'),
+  cycleNum: parseInt(safeGetStorage('bench_main_cycle_num', 1), 10) || 1,
   completed: parsedCompleted,
   selectedWeek: 'Week 1'
 };
@@ -109,6 +144,7 @@ let state = {
 function saveState() {
   safeSetStorage('bench_main_1rm', state.oneRm);
   safeSetStorage('bench_main_start_date', state.startDate);
+  safeSetStorage('bench_main_cycle_num', state.cycleNum);
   safeSetStorage('bench_main_completed', JSON.stringify(state.completed));
   renderHeader();
 }
@@ -135,8 +171,10 @@ function calculateTarget(intensity, origWeight) {
 function renderHeader() {
   const lbl1rm = document.getElementById('label-1rm');
   const lblCycle = document.getElementById('label-cycle');
-  if (lbl1rm) lbl1rm.textContent = `1RM: ${state.oneRm} lbs`;
-  if (lblCycle) lblCycle.textContent = `Cycle Start: ${state.startDate}`;
+  const lblCycleNum = document.getElementById('label-cycle-num');
+  if (lbl1rm) lbl1rm.textContent = `${state.oneRm} lbs`;
+  if (lblCycle) lblCycle.textContent = state.startDate;
+  if (lblCycleNum) lblCycleNum.textContent = `#${state.cycleNum}`;
 }
 
 function renderNav() {
@@ -188,18 +226,30 @@ function renderWorkouts() {
   }).join('');
 }
 
+function openConfigModal() {
+  document.getElementById('configCycleNum').value = state.cycleNum;
+  document.getElementById('config1rm').value = state.oneRm;
+  document.getElementById('configStartDate').value = state.startDate;
+  document.getElementById('configModal').classList.add('open');
+}
+
+function saveConfigModal() {
+  const cNum = parseInt(document.getElementById('configCycleNum').value, 10);
+  const oneRm = parseFloat(document.getElementById('config1rm').value);
+  const sDate = document.getElementById('configStartDate').value;
+
+  if (cNum > 0) state.cycleNum = cNum;
+  if (!isNaN(oneRm) && oneRm > 0) state.oneRm = oneRm;
+  if (sDate) state.startDate = sDate;
+
+  saveState();
+  closeModal('configModal');
+  renderWorkouts();
+}
+
 function openResetModal() {
+  document.getElementById('resetCycleNum').value = state.cycleNum + 1;
   document.getElementById('new1rmInput').value = state.oneRm + 10;
-  document.getElementById('resetModal').classList.add('open');
-}
-
-function closeResetModal() {
-  document.getElementById('resetModal').classList.remove('open');
-}
-
-function executeNextCycle() {
-  const input1rm = parseFloat(document.getElementById('new1rmInput').value);
-  if (isNaN(input1rm) || input1rm <= 0) return alert('Enter valid 1RM');
 
   try {
     const parts = (state.startDate || '2026-09-14').split('-');
@@ -208,23 +258,39 @@ function executeNextCycle() {
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const dayStr = String(d.getDate()).padStart(2, '0');
-    state.startDate = `${y}-${m}-${dayStr}`;
+    document.getElementById('newStartDateInput').value = `${y}-${m}-${dayStr}`;
   } catch (e) {
-    console.error(e);
+    document.getElementById('newStartDateInput').value = state.startDate;
   }
 
+  document.getElementById('resetModal').classList.add('open');
+}
+
+function closeModal(modalId) {
+  document.getElementById(modalId).classList.remove('open');
+}
+
+function executeNextCycle() {
+  const input1rm = parseFloat(document.getElementById('new1rmInput').value);
+  const inputDate = document.getElementById('newStartDateInput').value;
+  const inputCycle = parseInt(document.getElementById('resetCycleNum').value, 10);
+
+  if (isNaN(input1rm) || input1rm <= 0) return alert('Enter valid 1RM');
+  if (!inputDate) return alert('Select a valid start date');
+
+  state.cycleNum = inputCycle > 0 ? inputCycle : state.cycleNum + 1;
+  state.startDate = inputDate;
   state.oneRm = input1rm;
   state.completed = {};
   state.selectedWeek = 'Week 1';
 
   saveState();
-  closeResetModal();
+  closeModal('resetModal');
   renderNav();
   renderWorkouts();
-  alert(`Cycle reset complete!\nNew 1RM: ${state.oneRm} lbs\nNew Start Date: ${state.startDate}`);
+  alert(`Cycle #${state.cycleNum} started!\n1RM: ${state.oneRm} lbs\nStart Date: ${state.startDate}`);
 }
 
-// Run both on DOMContentLoaded and immediately as fallback
 document.addEventListener('DOMContentLoaded', function() {
   renderHeader();
   renderNav();
