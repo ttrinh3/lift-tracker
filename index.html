@@ -12,18 +12,18 @@
       --accent: #3b82f6; --success: #22c55e; --border: #334155;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding-bottom: 90px; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 90px; min-height: 100vh; }
     header { background: var(--card); padding: 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
     .header-meta { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--sub); margin-top: 6px; }
-    .nav-weeks { display: flex; overflow-x: auto; gap: 8px; padding: 12px 16px; background: #131d31; }
-    .week-btn { background: var(--card); border: 1px solid var(--border); color: var(--sub); padding: 8px 14px; border-radius: 20px; font-size: 0.85rem; white-space: nowrap; cursor: pointer; }
+    .nav-weeks { display: flex; overflow-x: auto; gap: 8px; padding: 12px 16px; background: #131d31; border-bottom: 1px solid var(--border); }
+    .week-btn { background: var(--card); border: 1px solid var(--border); color: var(--sub); padding: 8px 14px; border-radius: 20px; font-size: 0.85rem; white-space: nowrap; cursor: pointer; outline: none; }
     .week-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: bold; }
     .container { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
     .day-card { background: var(--card); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
     .day-header { padding: 12px 16px; background: #253349; display: flex; justify-content: space-between; align-items: center; }
     .day-title { font-size: 1rem; font-weight: 700; }
     .day-date { font-size: 0.8rem; color: #38bdf8; }
-    .exercise-row { padding: 16px; display: flex; align-items: flex-start; gap: 14px; cursor: pointer; }
+    .exercise-row { padding: 16px; display: flex; align-items: flex-start; gap: 14px; cursor: pointer; user-select: none; }
     .exercise-row.done { opacity: 0.45; text-decoration: line-through; }
     .checkbox-custom { width: 26px; height: 26px; border-radius: 6px; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; margin-top: 2px; flex-shrink: 0; }
     .done .checkbox-custom { background: var(--success); border-color: var(--success); }
@@ -33,7 +33,7 @@
     .ex-specs { font-size: 0.95rem; color: #e2e8f0; margin-top: 5px; }
     .ex-target { color: #f59e0b; font-weight: bold; font-size: 1.1rem; }
     .ex-cue { font-size: 0.8rem; color: var(--sub); margin-top: 6px; font-style: italic; line-height: 1.3; }
-    footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 12px 16px; display: flex; gap: 10px; }
+    footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 12px 16px; display: flex; gap: 10px; z-index: 10; }
     .btn { flex: 1; padding: 14px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.95rem; cursor: pointer; }
     .btn-primary { background: var(--accent); color: #fff; }
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
@@ -73,26 +73,55 @@
 </div>
 
 <script>
-const RAW_DATA = [{"week": "Week 1", "day": "Monday (Volume)", "offset": 0, "exercise": "Competition Bench Press", "sets": "4", "reps": "8", "intensity": "70%", "orig_weight": "220", "guidance": "Focu[...] }
+const RAW_DATA = [{"week": "Week 1", "day": "Monday (Volume)", "offset": 0, "exercise": "Competition Bench Press", "sets": "4", "reps": "8", "intensity": "70%", "orig_weight": "220", "guidance": "Focus on perfect setup: lock lats, root feet, establish solid arch."}, {"week": "Week 1", "day": "Wednesday (Speed)", "offset": 2, "exercise": "Speed Bench Press", "sets": "6", "reps": "3", "intensity": "60%", "orig_weight": "190", "guidance": "Dynamic Effort. Focus on absolute acceleration and crisp reversals."}, {"week": "Week 1", "day": "Friday (Max Effort)", "offset": 4, "exercise": "Competition Bench Press", "sets": "5", "reps": "3", "intensity": "85%", "orig_weight": "270", "guidance": "Neuromuscular focus. Every single rep must feature a true competition pause."}, {"week": "Week 2", "day": "Monday (Volume)", "offset": 7, "exercise": "Competition Bench Press", "sets": "4", "reps": "7", "intensity": "72.50%", "orig_weight": "230", "guidance": "Volume creeping up. Maintain total control on the descent."}, {"week": "Week 2", "day": "Wednesday (Speed)", "offset": 9, "exercise": "Speed Bench Press", "sets": "6", "reps": "3", "intensity": "60%", "orig_weight": "190", "guidance": "Explode off the chest. Think about driving yourself *into* the bench."}, {"week": "Week 2", "day": "Friday (Max Effort)", "offset": 11, "exercise": "Competition Bench Press", "sets": "5", "reps": "3", "intensity": "87.50%", "orig_weight": "275", "guidance": "Heavy triples. Pull the bar down aggressively, then explode."}, {"week": "Week 3", "day": "Monday (Volume)", "offset": 14, "exercise": "Competition Bench Press", "sets": "4", "reps": "6", "intensity": "75%", "orig_weight": "235", "guidance": "Accumulation peak. Sets should feel dense but repeatable."}, {"week": "Week 3", "day": "Wednesday (Speed)", "offset": 16, "exercise": "Speed Bench Press", "sets": "6", "reps": "3", "intensity": "60%", "orig_weight": "190", "guidance": "Maximum bar speed. If velocity dips noticeably; rest longer between sets."}, {"week": "Week 3", "day": "Friday (Max Effort)", "offset": 18, "exercise": "Competition Bench Press", "sets": "5", "reps": "2", "intensity": "90%", "orig_weight": "285", "guidance": "Heavy doubles. Establish maximum leg drive right off the chest."}, {"week": "Week 4", "day": "Monday (Deload)", "offset": 21, "exercise": "Competition Bench Press", "sets": "3", "reps": "5", "intensity": "60%", "orig_weight": "190", "guidance": "Flush blood through the tissue. Focus purely on technical precision."}, {"week": "Week 4", "day": "Wednesday (Deload)", "offset": 23, "exercise": "Speed Bench Press", "sets": "4", "reps": "3", "intensity": "50%", "orig_weight": "160", "guidance": "Crisp touch-and-go or soft pause. Neurological recovery focus."}, {"week": "Week 4", "day": "Friday (Deload)", "offset": 25, "exercise": "Competition Bench Press", "sets": "3", "reps": "3", "intensity": "70%", "orig_weight": "220", "guidance": "Crisp singles/triples. Stop well before any neurological fatigue."}, {"week": "Week 5", "day": "Monday (Volume)", "offset": 28, "exercise": "Competition Bench Press", "sets": "4", "reps": "6", "intensity": "75%", "orig_weight": "235", "guidance": "Step back into loading. Bar should move effortlessly on set 1."}, {"week": "Week 5", "day": "Wednesday (Speed)", "offset": 30, "exercise": "Speed Bench Press", "sets": "6", "reps": "3", "intensity": "62%", "orig_weight": "195", "guidance": "Speed focus. Small intensity bump (+2%) to match adapting strength."}, {"week": "Week 5", "day": "Friday (Max Effort)", "offset": 32, "exercise": "Competition Bench Press", "sets": "5", "reps": "2", "intensity": "91%", "orig_weight": "285", "guidance": "Heavy doubles. Rehearse competition commands (Start - Press - Rack)."}, {"week": "Week 6", "day": "Monday (Volume)", "offset": 35, "exercise": "Competition Bench Press", "sets": "4", "reps": "5", "intensity": "78%", "orig_weight": "245", "guidance": "Heavy volume session. Push aggressively against the floor to generate drive."}, {"week": "Week 6", "day": "Wednesday (Speed)", "offset": 37, "exercise": "Speed Bench Press", "sets": "6", "reps": "3", "intensity": "62%", "orig_weight": "195", "guidance": "Maintain speed under slight fatigue accumulation. Crisp reversals."}, {"week": "Week 6", "day": "Friday (Max Effort)", "offset": 39, "exercise": "Competition Bench Press", "sets": "4", "reps": "1", "intensity": "93.50%", "orig_weight": "295", "guidance": "Heavy sub-maximal singles. Master the setup groove under near-max loads."}, {"week": "Week 7", "day": "Monday (Volume)", "offset": 42, "exercise": "Competition Bench Press", "sets": "3", "reps": "4", "intensity": "80%", "orig_weight": "250", "guidance": "Volume dropping significantly. Focus on crisp; high-energy execution."}, {"week": "Week 7", "day": "Wednesday (Speed)", "offset": 44, "exercise": "Speed Bench Press", "sets": "5", "reps": "3", "intensity": "60%", "orig_weight": "190", "guidance": "Deliberately light and fast. Priming CNS firing speed."}, {"week": "Week 7", "day": "Friday (Max Effort)", "offset": 46, "exercise": "Competition Bench Press", "sets": "3", "reps": "1", "intensity": "95%", "orig_weight": "300", "guidance": "Final heavy opener test! Should feel like an easy first attempt (RPE ~8-8.5)."}, {"week": "Week 8", "day": "Monday (Taper)", "offset": 49, "exercise": "Competition Bench Press", "sets": "3", "reps": "2", "intensity": "70%", "orig_weight": "220", "guidance": "Feel the weight move fast. Zero fatigue accumulation allowed."}, {"week": "Week 8", "day": "Wednesday (Taper)", "offset": 51, "exercise": "Speed Bench Press", "sets": "3", "reps": "2", "intensity": "55%", "orig_weight": "175", "guidance": "Last touch of the barbell before test day. Explode on each rep."}, {"week": "Week 8", "day": "Friday (MAX TEST)", "offset": 53, "exercise": "TEST DAY: 1RM Attempt", "sets": "Opener / Att 2 / Att 3", "reps": "1", "intensity": "Max Peak", "orig_weight": "340-345", "guidance": "Warmup: Bar, 135, 185, 225, 275, 305. Opener: 315. Attempt 2: 335. Attempt 3: 345+ PR!"}];
+
+function safeGetStorage(key, fallback) {
+  try {
+    const val = localStorage.getItem(key);
+    return val !== null ? val : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function safeSetStorage(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch (e) {
+    console.warn('LocalStorage blocked:', e);
+  }
+}
+
+let parsedCompleted = {};
+try {
+  parsedCompleted = JSON.parse(safeGetStorage('bench_main_completed', '{}')) || {};
+} catch (e) {
+  parsedCompleted = {};
+}
 
 let state = {
-  oneRm: parseFloat(localStorage.getItem('bench_main_1rm')) || 315,
-  startDate: localStorage.getItem('bench_main_start_date') || '2026-09-14',
-  completed: JSON.parse(localStorage.getItem('bench_main_completed')) || {},
+  oneRm: parseFloat(safeGetStorage('bench_main_1rm', 315)) || 315,
+  startDate: safeGetStorage('bench_main_start_date', '2026-09-14'),
+  completed: parsedCompleted,
   selectedWeek: 'Week 1'
 };
 
 function saveState() {
-  localStorage.setItem('bench_main_1rm', state.oneRm);
-  localStorage.setItem('bench_main_start_date', state.startDate);
-  localStorage.setItem('bench_main_completed', JSON.stringify(state.completed));
+  safeSetStorage('bench_main_1rm', state.oneRm);
+  safeSetStorage('bench_main_start_date', state.startDate);
+  safeSetStorage('bench_main_completed', JSON.stringify(state.completed));
   renderHeader();
 }
 
 function calculateDate(daysOffset) {
-  const d = new Date(state.startDate + 'T00:00:00');
-  d.setDate(d.getDate() + daysOffset);
-  return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  try {
+    const parts = (state.startDate || '2026-09-14').split('-');
+    const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    d.setDate(d.getDate() + daysOffset);
+    return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  } catch (err) {
+    return 'Day ' + daysOffset;
+  }
 }
 
 function calculateTarget(intensity, origWeight) {
@@ -104,12 +133,15 @@ function calculateTarget(intensity, origWeight) {
 }
 
 function renderHeader() {
-  document.getElementById('label-1rm').textContent = `1RM: ${state.oneRm} lbs`;
-  document.getElementById('label-cycle').textContent = `Cycle Start: ${state.startDate}`;
+  const lbl1rm = document.getElementById('label-1rm');
+  const lblCycle = document.getElementById('label-cycle');
+  if (lbl1rm) lbl1rm.textContent = `1RM: ${state.oneRm} lbs`;
+  if (lblCycle) lblCycle.textContent = `Cycle Start: ${state.startDate}`;
 }
 
 function renderNav() {
   const nav = document.getElementById('weekNav');
+  if (!nav) return;
   const weeks = [...new Set(RAW_DATA.map(d => d.week))];
   nav.innerHTML = weeks.map(w => `
     <button class="week-btn ${w === state.selectedWeek ? 'active' : ''}" onclick="selectWeek('${w}')">${w}</button>
@@ -130,6 +162,7 @@ function toggleExercise(id) {
 
 function renderWorkouts() {
   const container = document.getElementById('workoutList');
+  if (!container) return;
   const weekItems = RAW_DATA.map((item, idx) => ({ ...item, id: idx })).filter(item => item.week === state.selectedWeek);
 
   container.innerHTML = weekItems.map(item => {
@@ -168,9 +201,18 @@ function executeNextCycle() {
   const input1rm = parseFloat(document.getElementById('new1rmInput').value);
   if (isNaN(input1rm) || input1rm <= 0) return alert('Enter valid 1RM');
 
-  const d = new Date(state.startDate + 'T00:00:00');
-  d.setDate(d.getDate() + 56);
-  state.startDate = d.toISOString().split('T')[0];
+  try {
+    const parts = (state.startDate || '2026-09-14').split('-');
+    const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    d.setDate(d.getDate() + 56);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const dayStr = String(d.getDate()).padStart(2, '0');
+    state.startDate = `${y}-${m}-${dayStr}`;
+  } catch (e) {
+    console.error(e);
+  }
+
   state.oneRm = input1rm;
   state.completed = {};
   state.selectedWeek = 'Week 1';
@@ -181,6 +223,13 @@ function executeNextCycle() {
   renderWorkouts();
   alert(`Cycle reset complete!\nNew 1RM: ${state.oneRm} lbs\nNew Start Date: ${state.startDate}`);
 }
+
+// Run both on DOMContentLoaded and immediately as fallback
+document.addEventListener('DOMContentLoaded', function() {
+  renderHeader();
+  renderNav();
+  renderWorkouts();
+});
 
 renderHeader();
 renderNav();
